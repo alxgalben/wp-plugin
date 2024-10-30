@@ -1,4 +1,13 @@
 <?php
+
+/*
+Plugin Name: Transfer Feedback & Rating
+Description: Plugin pentru colectarea feedback-ului și rating-urilor pentru transferuri.
+Version: 1.0
+Author: Alex Galben
+Shortcode: [tf_feedback_form transfer_code="COD_TRANSFER"]
+*/
+
 function tf_enqueue_scripts()
 {
     wp_enqueue_style('bootstrap-css', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css');
@@ -114,4 +123,3 @@ function tf_get_criteria()
         return $criteria ?: [];
     }
 }
-?>
