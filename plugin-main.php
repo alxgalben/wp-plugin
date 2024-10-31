@@ -1,30 +1,26 @@
 <?php
 
 /*
-Plugin Name: Transfer Feedback & Rating
-Description: Plugin pentru colectarea feedback-ului și rating-urilor pentru transferuri.
-Version: 1.0
+Plugin Name: Transfer Feedback & Rating with Thank You Details
+Description: Plugin pentru colectarea feedback-ului și rating-urilor pentru transferuri și afișarea detaliilor în pagina de mulțumire.
+Version: 1.1
 Author: Alex Galben
-Shortcode: [tf_feedback_form transfer_code="COD_TRANSFER"]
 */
 
-function tf_enqueue_scripts()
-{
+function tf_enqueue_scripts() {
     wp_enqueue_style('bootstrap-css', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css');
     wp_enqueue_script('jquery');
 }
 add_action('wp_enqueue_scripts', 'tf_enqueue_scripts');
 
-function tf_feedback_form_shortcode($atts)
-{
+// Shortcode for Feedback Form
+function tf_feedback_form_shortcode($atts) {
     $atts = shortcode_atts(['transfer_code' => ''], $atts, 'tf_feedback_form');
     $transfer_code = esc_attr($atts['transfer_code']);
 
     ob_start();
-
     $criteria = tf_get_criteria();
-
-?>
+    ?>
     <form id="feedbackForm" class="feedback-form" data-transfer-code="<?php echo $transfer_code; ?>">
         <?php if ($criteria): ?>
             <?php foreach ($criteria as $criterion): ?>
@@ -46,7 +42,6 @@ function tf_feedback_form_shortcode($atts)
     </form>
 
     <script>
-        // stele
         jQuery(document).ready(function($) {
             $('.rating .star').on('click', function() {
                 $(this).siblings().removeClass('selected');
@@ -54,7 +49,7 @@ function tf_feedback_form_shortcode($atts)
             });
         });
 
-        // feedback
+        // AJAX
         function submitFeedback() {
             const feedbackData = {
                 transfer_code: jQuery('#feedbackForm').data('transfer-code'),
@@ -84,15 +79,13 @@ function tf_feedback_form_shortcode($atts)
             });
         }
     </script>
-<?php
+    <?php
 
     return ob_get_clean();
 }
 add_shortcode('tf_feedback_form', 'tf_feedback_form_shortcode');
 
-// ajax
-function tf_submit_feedback()
-{
+function tf_submit_feedback() {
     $feedback_data = $_POST['feedback_data'];
 
     $api_url = 'https://api.example.com/feedback';
@@ -111,8 +104,7 @@ function tf_submit_feedback()
 add_action('wp_ajax_submit_feedback', 'tf_submit_feedback');
 add_action('wp_ajax_nopriv_submit_feedback', 'tf_submit_feedback');
 
-function tf_get_criteria()
-{
+function tf_get_criteria() {
     $api_url = 'https://api.example.com/criteria';
     $response = wp_remote_get($api_url);
 
@@ -123,3 +115,46 @@ function tf_get_criteria()
         return $criteria ?: [];
     }
 }
+
+// Thank You Details
+function tf_thank_you_details_shortcode($atts) {
+    $atts = shortcode_atts(['transfer_code' => ''], $atts, 'tf_thank_you_details');
+    $transfer_code = esc_attr($atts['transfer_code']);
+
+    $transfer_details = tf_get_transfer_details($transfer_code);
+
+    ob_start();
+    if ($transfer_details): ?>
+        <div class="container">
+            <h3>Detalii Transfer</h3>
+            <div class="row">
+                <div class="col-md-6"><strong>Nume:</strong> <?php echo esc_html($transfer_details['nume']); ?></div>
+                <div class="col-md-6"><strong>Prenume:</strong> <?php echo esc_html($transfer_details['prenume']); ?></div>
+                <div class="col-md-6"><strong>Zbor:</strong> <?php echo esc_html($transfer_details['nr_zbor']); ?></div>
+                <div class="col-md-6"><strong>Data și Ora:</strong> <?php echo esc_html($transfer_details['data_ora']); ?></div>
+                <div class="col-md-6"><strong>Preluare:</strong> <?php echo esc_html($transfer_details['preluare']); ?></div>
+                <div class="col-md-6"><strong>Destinație:</strong> <?php echo esc_html($transfer_details['destinatie']); ?></div>
+            </div>
+        </div>
+    <?php else: ?>
+        <p>Detaliile transferului nu au fost găsite.</p>
+    <?php
+    endif;
+
+    return ob_get_clean();
+}
+add_shortcode('tf_thank_you_details', 'tf_thank_you_details_shortcode');
+
+function tf_get_transfer_details($transfer_code) {
+    $api_url = 'https://api.example.com/transfer-details?code=' . urlencode($transfer_code);
+    $response = wp_remote_get($api_url);
+
+    if (is_wp_error($response)) {
+        return false;
+    } else {
+        $transfer_details = json_decode(wp_remote_retrieve_body($response), true);
+        return $transfer_details ?: false;
+    }
+}
+
+?>
