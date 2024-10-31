@@ -116,12 +116,11 @@ function tf_get_criteria() {
     }
 }
 
-// Shortcode for Thank You Details with Dummy Data
 function tf_thank_you_details_shortcode($atts) {
     $atts = shortcode_atts(['transfer_code' => ''], $atts, 'tf_thank_you_details');
     $transfer_code = esc_attr($atts['transfer_code']);
 
-    // Dummy data for testing
+    // Dummy data
     $transfer_details = [
         'nume' => 'Ion',
         'prenume' => 'Popescu',
