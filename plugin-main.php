@@ -116,12 +116,20 @@ function tf_get_criteria() {
     }
 }
 
-// Thank You Details
+// Shortcode for Thank You Details with Dummy Data
 function tf_thank_you_details_shortcode($atts) {
     $atts = shortcode_atts(['transfer_code' => ''], $atts, 'tf_thank_you_details');
     $transfer_code = esc_attr($atts['transfer_code']);
 
-    $transfer_details = tf_get_transfer_details($transfer_code);
+    // Dummy data for testing
+    $transfer_details = [
+        'nume' => 'Ion',
+        'prenume' => 'Popescu',
+        'nr_zbor' => 'AB1234',
+        'data_ora' => '2023-12-15 10:30',
+        'preluare' => 'Aeroportul Otopeni',
+        'destinatie' => 'Hotel Intercontinental'
+    ];
 
     ob_start();
     if ($transfer_details): ?>
@@ -144,17 +152,5 @@ function tf_thank_you_details_shortcode($atts) {
     return ob_get_clean();
 }
 add_shortcode('tf_thank_you_details', 'tf_thank_you_details_shortcode');
-
-function tf_get_transfer_details($transfer_code) {
-    $api_url = 'https://api.example.com/transfer-details?code=' . urlencode($transfer_code);
-    $response = wp_remote_get($api_url);
-
-    if (is_wp_error($response)) {
-        return false;
-    } else {
-        $transfer_details = json_decode(wp_remote_retrieve_body($response), true);
-        return $transfer_details ?: false;
-    }
-}
 
 ?>
